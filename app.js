@@ -3,7 +3,8 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-
+const Dishes=require('./models/dishes');//importing Dishes schema
+const mongoose=require('mongoose');//importing mongoose to manipulate end to end
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var dishRouter=require('./routes/dishRouter');
@@ -11,6 +12,11 @@ var leaderRouter=require('./routes/leaderRouter');
 var promoRouter=require('./routes/promoRouter');
 var app = express();
 
+const url='mongodb://localhost:27017/conFusion';//url for the db;conFusio is the name of the db
+const connect=mongoose.connect(url);
+connect.then((db)=>{
+  console.log('Connected correctly to the Server');
+},(err)=>console.log(err));
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
