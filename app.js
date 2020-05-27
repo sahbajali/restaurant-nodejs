@@ -3,6 +3,7 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+
 const Dishes=require('./models/dishes');//importing Dishes schema
 const mongoose=require('mongoose');//importing mongoose to manipulate end to end
 var indexRouter = require('./routes/index');
@@ -25,6 +26,31 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+
+function auth(req,res,next) {
+  console.log(req.headers);
+  var authHeader=req.headers.authorization;//authorization is a property in header
+  if(!authHeader){
+    var err=new Error('You are not authenticated!');
+    res.setHeader('WWW-Authenticate','Basic');
+    err.status=401;
+    next(err);
+    return;
+  }
+  var auth=new Buffer.from(authHeader.split(' ')[1],'base64').toString().split(':');
+  var user=auth[0];
+  var pass=auth[1];
+  if(user==='admin'&&pass==='password'){
+    next();
+  }
+  else{
+    var err=new Error('You are not authenticated!');
+    res.setHeader('WWW-Authenticate','Basic');
+    err.status=401;
+    next(err);
+  }
+}
+app.use(auth);//adding authentication to the app.auth is the name of the function
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
@@ -49,3 +75,4 @@ app.use(function(err, req, res, next) {
 });
 
 module.exports = app;
+//mongod --dbpath=data --bind_ip 127.0.0.1
