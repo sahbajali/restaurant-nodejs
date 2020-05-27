@@ -3,6 +3,8 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+var session =require('express-session');
+var FileStore=require('session-file-store')(session);
 
 const Dishes=require('./models/dishes');//importing Dishes schema
 const mongoose=require('mongoose');//importing mongoose to manipulate end to end
@@ -25,12 +27,17 @@ app.set('view engine', 'jade');
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser('1234567890-0987654321'));//keep any secret key doesnt matter
-
+//app.use(cookieParser('1234567890-0987654321'));
+app.use(session({
+  name:'session-id',
+  secret:'1234567890-0987654321',
+  saveUninitialized:false,
+  store:new FileStore()
+}));
 function auth(req,res,next) {
-  console.log(req.signedCookies);
+  console.log(req.session);
 
-  if(!req.signedCookies.user){
+  if(!req.session.user){
     var authHeader=req.headers.authorization;//authorization is a property in header
     if(!authHeader){
       var err=new Error('You are not authenticated!');
@@ -43,7 +50,8 @@ function auth(req,res,next) {
     var user=auth[0];
     var pass=auth[1];
     if(user==='admin'&&pass==='password'){
-      res.cookie('user','admin',{signed:true})
+      //res.cookie('user','admin',{signed:true})
+      req.session.user='admin';
       next();
     }
     else{
@@ -54,7 +62,7 @@ function auth(req,res,next) {
     }
   }
   else{
-    if(req.signedCookies.user==='admin'){
+    if(req.session.user==='admin'){
       next();
     }
     else{
