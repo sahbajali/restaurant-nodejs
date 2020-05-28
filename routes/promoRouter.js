@@ -2,6 +2,7 @@ const express=require('express');
 const bodyParser=require('body-parser');
 const promoRouter=express.Router();
 const Promo=require('../models/promo');
+const authenticate=require('../authenticate');
 promoRouter.use(bodyParser.json());
 
 promoRouter.route('/')
@@ -14,7 +15,7 @@ promoRouter.route('/')
     },(err)=>next(err))
     .catch((err)=>next(err));
 })
-.post((req,res,next)=>{
+.post(authenticate.verifyUser,(req,res,next)=>{
     Promo.create(req.body)
     .then((promo)=>{
         console.log('Dish created ',promo);
@@ -24,12 +25,12 @@ promoRouter.route('/')
     },(err)=>next(err))
     .catch((err)=>next(err));
 })
-.put((req,res,next)=>{
+.put(authenticate.verifyUser,(req,res,next)=>{
     res.statusCode=403;
     res.end('PUT operation not supported on /promotions');
 })
 
-.delete((req,res,next)=>{
+.delete(authenticate.verifyUser,(req,res,next)=>{
     Promo.remove({})
     .then((resp)=>{
         res.statusCode=200;

@@ -7,6 +7,7 @@ var session =require('express-session');
 var FileStore=require('session-file-store')(session);
 var passport=require('passport');
 var authenticate=require('./authenticate');
+var config=require('./config');
 
 const Dishes=require('./models/dishes');//importing Dishes schema
 const mongoose=require('mongoose');//importing mongoose to manipulate end to end
@@ -17,7 +18,8 @@ var leaderRouter=require('./routes/leaderRouter');
 var promoRouter=require('./routes/promoRouter');
 var app = express();
 
-const url='mongodb://localhost:27017/conFusion';//url for the db;conFusio is the name of the db
+//const url='mongodb://localhost:27017/conFusion';//conFusion is the name of the db
+const url=config.mongoUrl;//using config centrally for storing the configs
 const connect=mongoose.connect(url);
 connect.then((db)=>{
   console.log('Connected correctly to the Server');
@@ -30,30 +32,11 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 //app.use(cookieParser('1234567890-0987654321'));
-app.use(session({
-  name:'session-id',//asking to make session with name session-id
-  secret:'1234567890-0987654321',
-  saveUninitialized:false,
-  resave:false,
-  store:new FileStore()
-}));
 app.use(passport.initialize());
-app.use(passport.session());
+
 app.use('/', indexRouter);//localhost:3000/
 app.use('/users', usersRouter);//localhost:3000/users/
-function auth(req,res,next) {
-  console.log(req.session);
 
-  if(!req.user){
-    var err=new Error('You are not authenticated!');
-    err.status=403;
-    return next(err);
-  }
-  else{
-      next();
-    }
-}
-app.use(auth);//adding authentication to the app.auth is the name of the function
 app.use(express.static(path.join(__dirname, 'public')));
 
 

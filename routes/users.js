@@ -2,6 +2,7 @@ var express = require('express');
 const bodyParser=require('body-parser');
 var User=require('../models/user');
 var passport=require('passport');
+var authenticate=require('../authenticate');
 var router = express.Router();
 router.use(bodyParser.json());
 /* GET users listing. */
@@ -28,10 +29,13 @@ router.post('/signup', (req, res, next)=> {
 }); //end of post
 
 router.post('/login',passport.authenticate('local'),(req,res)=>{
+  console.log("nulla user");
+  //when passport.authenticate auths the user, it will load the user in req
+  var token=authenticate.getToken({_id:req.user._id});
   res.statusCode=200;//login by providing usname and pwd in req body instd of authorztn
   res.setHeader('Content-Type','application/json');
-  res.json({success:true,status:'You are successfully logged in!'});
-});
+  res.json({success:true, token: token, status:'You are successfully logged in!'});
+});//passing token in the response body
 
 router.get('/logout',(req,res)=>{
   if(req.session){
