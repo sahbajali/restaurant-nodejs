@@ -29,56 +29,40 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 //app.use(cookieParser('1234567890-0987654321'));
 app.use(session({
-  name:'session-id',
+  name:'session-id',//asking to make session with name session-id
   secret:'1234567890-0987654321',
   saveUninitialized:false,
+  resave:false,
   store:new FileStore()
 }));
+app.use('/', indexRouter);//localhost:3000/
+app.use('/users', usersRouter);//localhost:3000/users/
+/*
 function auth(req,res,next) {
   console.log(req.session);
 
   if(!req.session.user){
-    var authHeader=req.headers.authorization;//authorization is a property in header
-    if(!authHeader){
-      var err=new Error('You are not authenticated!');
-      res.setHeader('WWW-Authenticate','Basic');
-      err.status=401;
-      next(err);
-      return;
-    }
-    var auth=new Buffer.from(authHeader.split(' ')[1],'base64').toString().split(':');
-    var user=auth[0];
-    var pass=auth[1];
-    if(user==='admin'&&pass==='password'){
-      //res.cookie('user','admin',{signed:true})
-      req.session.user='admin';
-      next();
-    }
-    else{
-      var err=new Error('You are not authenticated!');
-      res.setHeader('WWW-Authenticate','Basic');
-      err.status=401;
-      next(err);
-    }
+    var err=new Error('You are not authenticated!');
+    err.status=403;
+    return next(err);
   }
   else{
-    if(req.session.user==='admin'){
+    if(req.session.user==='authenticated'){
       next();
     }
     else{
       var err=new Error('You are not authenticated!');
-      //res.setHeader('WWW-Authenticate','Basic');
-      err.status=401;
+      err.status=403;
       next(err);
     }
   }
   
 }
 app.use(auth);//adding authentication to the app.auth is the name of the function
+*/
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
+
 app.use('/dishes', dishRouter);
 app.use('/promotions', promoRouter);
 app.use('/leaders', leaderRouter);
