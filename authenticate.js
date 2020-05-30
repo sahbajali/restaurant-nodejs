@@ -20,7 +20,7 @@ exports.getToken=function(user){//user will accept json
 var opts={};
 opts.jwtFromRequest=ExtractJwt.fromAuthHeaderAsBearerToken();//how to extract the token
 opts.secretOrKey=config.secretKey;
-
+//where is this jwt_payload coming from although when req is made using only token??
 exports.jwtPassport=passport.use(new JwtStrategy(opts,(jwt_payload,done)=>{
     console.log("JWT payload: ",jwt_payload);
     User.findOne({_id:jwt_payload._id},(err,user)=>{
@@ -38,8 +38,16 @@ exports.jwtPassport=passport.use(new JwtStrategy(opts,(jwt_payload,done)=>{
         }
     });
 }));
-
+//verifyUser is using the jwtPassport created above to authenticate
 exports.verifyUser=passport.authenticate('jwt',{session:false});
+exports.verifyAdmin = function(req,res,next){
+    if(req.user.admin ==true)  {
+        return next();
+    }else {
+        var err=new Error("You are not authenticated to modify since you are not admin!");
+        return next(err);
+    }
+};
 //strategy is jwt and made session false becoz we wont create sessions.
 //verifyUser can be used to verify user's authenticity just by using verifyUser
 //it authenticates from the extracted token from 

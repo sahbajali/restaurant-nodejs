@@ -2,7 +2,16 @@ var mongoose=require('mongoose');
 var passportLocalMongoose=require('passport-local-mongoose');
 var Schema=mongoose.Schema;
 var User=new Schema({
-    //username and pwd property would be automatically updated by passportlocalmongoose
+    //username and password property would be automatically updated by
+    // passportlocalmongoose
+    firstname:{
+        type:String,
+        default:''
+    },
+    lastname:{
+        type:String,
+        default:''
+    },
     admin:{
         type:Boolean,
         default:false
