@@ -11,6 +11,10 @@ router.get('/', authenticate.verifyUser,authenticate.verifyAdmin, function(req, 
   var token=authenticate.getToken({_id:req.user._id});
   User.find({})
     .then((users)=>{
+      /*.then((err, users) => {
+            if (err) {
+                return next(err);
+            }*/
         res.statusCode=200;
         res.setHeader('Content-Type','application/json');
         res.json(users);

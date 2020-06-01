@@ -44,10 +44,19 @@ exports.verifyAdmin = function(req,res,next){
     if(req.user.admin ==true)  {
         return next();
     }else {
-        var err=new Error("You are not authenticated to modify since you are not admin!");
+        var err=new Error("You are not authorized to perform this operation!");
+        err.status=403;
         return next(err);
     }
 };
+/*
+User.findOne({_id: req.user._id})
+    .then((user) => {
+        console.log("User: ", req.user);
+        if (user.admin) {
+            next();
+        }
+*/
 //strategy is jwt and made session false becoz we wont create sessions.
 //verifyUser can be used to verify user's authenticity just by using verifyUser
 //it authenticates from the extracted token from 

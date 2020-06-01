@@ -124,21 +124,17 @@ dishRouter.route('/:dishId/comments')
     },(err)=>next(err))
     .catch((err)=>next(err));
 })
-.put(authenticate.verifyUser, (req,res,next)=>{
+.put(authenticate.verifyUser,authenticate.verifyAdmin, (req,res,next)=>{
     res.statusCode=403;
     res.end('PUT operation not supported on /dishes/'+req.params.dishId+'/comments');
 })
-.delete(authenticate.verifyUser,(req,res,next)=>{
-    //no one should be able to delete other's comments
-    //I will only allow to delete all those comments which belongs to that user only
+.delete(authenticate.verifyUser,authenticate.verifyAdmin,(req,res,next)=>{
+    //no one should be able to delete all comments except admin
     Dishes.findById(req.params.dishId)
     .then((dish)=>{
         if(dish!=null){
             for(var i=dish.comments.length-1;i>=0;i--){
-                var uid=JSON.stringify(req.user._id);
-                var cid=JSON.stringify(dish.comments.id(dish.comments[i]._id).author);
-                if(cid==uid)
-                    dish.comments.id(dish.comments[i]._id).remove();
+                dish.comments.id(dish.comments[i]._id).remove();
             }
             //dish.comments=[];
             dish.save()
@@ -222,7 +218,7 @@ dishRouter.route('/:dishId/comments/:commentId')
                 .catch((err)=>next(err)); 
             }
             else{
-                err=new Error('You are not the author of this comment. Sorry you cannot update it');
+                err=new Error('You are not the authorized to update this comment!');
                 err.status=403;
                 return next(err);
             }
@@ -244,9 +240,9 @@ dishRouter.route('/:dishId/comments/:commentId')
 .delete(authenticate.verifyUser, (req,res,next)=>{//while deleting jwt is authing
     Dishes.findById(req.params.dishId)
     .then((dish)=>{
-        var uid=JSON.stringify(req.user._id);
-        var cid=JSON.stringify(dish.comments.id(req.params.commentId).author);
-        if(cid==uid){
+        var uid=req.user._id;
+        var cid=dish.comments.id(req.params.commentId).author;
+        if(cid.equals(uid)){
             dish.comments.id(req.params.commentId).remove();
             dish.save()
             .then((dish)=>{
@@ -260,8 +256,8 @@ dishRouter.route('/:dishId/comments/:commentId')
             },(err)=>next(err))
             .catch((err)=>next(err)); 
         }
-        else if(cid!=uid){
-            err=new Error('You are not the author of this comment. Sorry you cannot delete it');
+        else if(!cid.equals(uid)){
+            err=new Error('You are not the authorized to delete this comment');
             err.status=403;
             return next(err);
         }
