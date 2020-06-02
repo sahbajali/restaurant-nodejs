@@ -3,10 +3,11 @@ const bodyParser=require('body-parser');
 var User=require('../models/user');
 var passport=require('passport');
 var authenticate=require('../authenticate');
+const cors =require('./cors');
 var router = express.Router();
 router.use(bodyParser.json());
 /* GET users listing. */
-router.get('/', authenticate.verifyUser,authenticate.verifyAdmin, function(req, res, next) {
+router.get('/',cors.corsWithOptions,  authenticate.verifyUser,authenticate.verifyAdmin, function(req, res, next) {
   //respond with all the users to the admin only
   var token=authenticate.getToken({_id:req.user._id});
   User.find({})
@@ -22,7 +23,7 @@ router.get('/', authenticate.verifyUser,authenticate.verifyAdmin, function(req, 
     .catch((err)=>next(err));
   });
 
-router.post('/signup', (req, res, next)=> {
+router.post('/signup',cors.corsWithOptions,  (req, res, next)=> {
   User.register(new User({username:req.body.username}),req.body.password,(err,user)=>{
     if(err){
       res.statusCode=500;
@@ -53,7 +54,7 @@ router.post('/signup', (req, res, next)=> {
   }) //end of register
 }); //end of post
 
-router.post('/login',passport.authenticate('local'),(req,res)=>{
+router.post('/login',cors.corsWithOptions, passport.authenticate('local'),(req,res)=>{
   //when passport.authenticate auths the user, it will load the user in req
   var token=authenticate.getToken({_id:req.user._id});//making token using id
   res.statusCode=200;//login by providing usname and pwd in req body instd of authorztn
