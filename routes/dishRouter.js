@@ -95,7 +95,7 @@ dishRouter.route('/:dishId/comments')
         else{
             err=new Error('Dish '+req.params.id+' not found');
             err.status=404;
-            return next(err);
+            return next(err);//return used here
         }
     },(err)=>next(err))
     .catch((err)=>next(err));
