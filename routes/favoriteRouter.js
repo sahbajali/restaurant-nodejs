@@ -99,8 +99,27 @@ favoriteRouter.route('/')
 favoriteRouter.route('/:dishId')
 .options(cors.corsWithOptions,(req,res)=>{res.sendStatus(200);})
 .get(cors.cors, authenticate.verifyUser, (req,res,next)=>{
-    res.statusCode=403;
-    res.end('GET operation not supported on /favorites/'+req.params.dishId);
+    Favorites.findOne({user:req.user._id})
+    .then((favs)=>{
+        if(!favs){
+            res.statusCode=200;//exists is the flag used by client
+            res.setHeader('Content-Type','applicationn/json');
+            return res.json({"exists":false,"favorites":favs});
+        }
+        else{
+            if(favorites.dishes.indexOf(req.params.dishId)<0){
+                res.statusCode=200;
+                res.setHeader('Content-Type','applicationn/json');
+                return res.json({"exists":false,"favorites":favs});
+            }
+            else{
+                res.statusCode=200;
+                res.setHeader('Content-Type','applicationn/json');
+                return res.json({"exists":true,"favorites":favs});
+            }
+        }
+    }, (err)=>next(err))
+    .catch((err)=>next(err));
 })
 .post(cors.corsWithOptions, authenticate.verifyUser,(req,res,next)=>{
     Favorites.findOne({user:req.user._id})
@@ -145,7 +164,7 @@ favoriteRouter.route('/:dishId')
             .then((favs)=>{
                 res.statusCode=200;
                 res.setHeader('Content-Type','application/json');
-                res.end("Dish deleted! Favorite list is now empty");
+                res.end("dish deleted! favorites empty now");
             },(err)=>next(err))
             .catch((err)=>next(err));
         }
